@@ -1,9 +1,10 @@
 {
-  "repository": "#",
+  "repository": "https://github.com/rphansen91/rubiks-cube",
   "license": "UNLICENSED",
   "scripts": {
     "build": "webpack --config ./bundler/webpack.prod.js",
-    "dev": "webpack serve --config ./bundler/webpack.dev.js"
+    "dev": "webpack serve --config ./bundler/webpack.dev.js",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@babel/core": "^7.17.10",
@@ -29,6 +30,7 @@
     "webpack-merge": "^5.8.0"
   },
   "devDependencies": {
+    "gh-pages": "^4.0.0",
     "ts-loader": "^9.4.2",
     "typescript": "^4.9.4"
   }

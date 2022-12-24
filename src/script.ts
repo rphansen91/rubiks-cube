@@ -132,7 +132,7 @@ const back = rubiksCube.backFacingCubes()
 const cursor = new THREE.Raycaster()
 const pointer = new THREE.Vector2();
 const selected = new Map<string, THREE.Object3D>()
-let faces = rubiksCube.getFaces()
+const updatable = new Set<CubeFace>()
 let rotating: CubeFace | null = null
 
 function updatePointer (ev: PointerEvent) {
@@ -149,8 +149,6 @@ window.addEventListener('pointerdown', (ev) => {
   const cubes = rubiksCube.getCubesByUUID()
   const cubeObjects = rubiksCube.getCubeObjects()
   const hovering = cursor.intersectObjects(cubeObjects)
-  faces = rubiksCube.getFaces()
-  rotating = null
   
   if (hovering.length) {
     const object = hovering[0].object
@@ -160,25 +158,25 @@ window.addEventListener('pointerdown', (ev) => {
 
     const singleCube = cubes.get(object.parent.uuid)
     const isFacing = singleCube.isFacing()
-    const sides = Object.keys(isFacing).filter((side: keyof typeof isFacing) => isFacing[side])
+    // const sides = Object.keys(isFacing).filter((side: keyof typeof isFacing) => isFacing[side])
 
     if (isFacing.bottom) {
-      rotating = faces.bottom
+      rotating = rubiksCube.bottomFacingCubes()
     }
     else if (isFacing.left) {
-      rotating = faces.left
+      rotating = rubiksCube.leftFacingCubes()
     }
     else if (isFacing.right) {
-      rotating = faces.right
+      rotating = rubiksCube.rightFacingCubes()
     }
     else if (isFacing.top) {
-      rotating = faces.top
+      rotating = rubiksCube.topFacingCubes()
     } 
     else if (isFacing.front) {
-      rotating = faces.front
+      rotating = rubiksCube.frontFacingCubes()
     }
     else if (isFacing.back) {
-      rotating = faces.back
+      rotating = rubiksCube.backFacingCubes()
     } 
 
     if (rotating) {
@@ -203,6 +201,7 @@ window.addEventListener('pointerup', () => {
   if (rotating) {
     rotating.scale(1)
     rotating.complete()
+    updatable.add(rotating)
   }
   
   // rubiksCube.autoRotate = true
@@ -217,9 +216,10 @@ const tick = () => {
   // Update controls
   orbit.update();
   rubiksCube.update({ deltaTime });
-  if (rotating) {
-    rotating.update({ deltaTime })
-  }
+  updatable.forEach(object => {
+    const updated = object.update({ deltaTime })
+    if (!updated) updatable.delete(object)
+  })
   
   // top.rotate(deltaTime * 0.15)
   // bottom.rotate(deltaTime * -0.25)

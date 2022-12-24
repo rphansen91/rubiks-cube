@@ -95,7 +95,8 @@ export class RubiksCube {
   topFacingCubes() {
     return new CubeFaceTopBottom(
       this,
-      this.cubes.filter((c) => c.isTopFacing())
+      this.cubes.filter((c) => c.isTopFacing()),
+      -1
     );
   }
 
@@ -159,6 +160,11 @@ export class CubeFace {
     const v = this.qturnTo * this.easing * deltaTime
     this.qturnTo -= v
     this.rotate(v)
+
+    if (this.qturnTo > 0) {
+      return this.qturnTo > 1e-6
+    }
+    return this.qturnTo < -1e-6
   }
 }
 
