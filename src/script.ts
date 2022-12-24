@@ -146,6 +146,7 @@ window.addEventListener('pointermove', (ev) => {
 
 window.addEventListener('pointerdown', (ev) => {
   updatePointer(ev)
+  cursor.setFromCamera(pointer, camera);
   const cubes = rubiksCube.getCubesByUUID()
   const cubeObjects = rubiksCube.getCubeObjects()
   const hovering = cursor.intersectObjects(cubeObjects)
