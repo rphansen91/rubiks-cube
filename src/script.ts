@@ -119,8 +119,6 @@ window.addEventListener('pointerdown', (ev) => {
       rotating.scale(1.05)
     }
   }
-
-  clickIndex++
 })
 
 const movement = new MovementTracker()
@@ -138,8 +136,11 @@ window.addEventListener('pointerup', () => {
   selected.clear()
   if (rotating) {
     rotating.scale(1)
-    rotating.complete()
+    const changed = rotating.complete()
     updatable.add(rotating)
+    if (!changed) {
+      clickIndex++
+    }
   }
   
   // rubiksCube.autoRotate = true

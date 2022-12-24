@@ -154,6 +154,7 @@ export class CubeFace {
   complete () {
     const finish = Math.round(this.qturn)
     this.qturnTo = finish - this.qturn
+    return finish > 0.8
   }
 
   update ({ deltaTime }: { deltaTime: number }) {
