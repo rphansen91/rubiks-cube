@@ -113,27 +113,7 @@ window.addEventListener('pointerdown', (ev) => {
     const isFacing = singleCube.isFacing()
     const sides = Object.keys(isFacing).filter((side: keyof typeof isFacing) => isFacing[side])
     const side = sides[clickIndex % sides.length]
-    console.log(sides, side)
     rotating = rubiksCube.getFace(side)
-
-    // if (isFacing.bottom) {
-    //   rotating = rubiksCube.bottomFacingCubes()
-    // }
-    // else if (isFacing.left) {
-    //   rotating = rubiksCube.leftFacingCubes()
-    // }
-    // else if (isFacing.right) {
-    //   rotating = rubiksCube.rightFacingCubes()
-    // }
-    // else if (isFacing.top) {
-    //   rotating = rubiksCube.topFacingCubes()
-    // } 
-    // else if (isFacing.front) {
-    //   rotating = rubiksCube.frontFacingCubes()
-    // }
-    // else if (isFacing.back) {
-    //   rotating = rubiksCube.backFacingCubes()
-    // } 
 
     if (rotating) {
       rotating.scale(1.05)
