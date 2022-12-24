@@ -59,22 +59,22 @@ export class RubiksCube {
     return this.cubes.map(c => c.group)
   }
 
-  getFaces () {
-    return {
-      right: this.rightFacingCubes(),
-      left: this.leftFacingCubes(),
-      top: this.topFacingCubes(),
-      bottom: this.bottomFacingCubes(),
-      front: this.frontFacingCubes(),
-      back: this.backFacingCubes(),
-    }
-  }
-
   update ({ deltaTime }: { deltaTime: number }) {
     if (this.autoRotate) {
       this.group.rotation.x += deltaTime * 0.15
       this.group.rotation.y += deltaTime * 0.1
       this.group.rotation.z += deltaTime * 0.05
+    }
+  }
+
+  getFace (face: string) {
+    switch (face) {
+      case 'right': return this.rightFacingCubes()
+      case 'left': return this.leftFacingCubes()
+      case 'top': return this.topFacingCubes()
+      case 'bottom': return this.bottomFacingCubes()
+      case 'front': return this.frontFacingCubes()
+      case 'back': return this.backFacingCubes()
     }
   }
 

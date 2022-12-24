@@ -42,7 +42,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.set(-3, 3, 3);
+camera.position.set(-3, 3, 5);
 scene.add(camera);
 
 // Controls
@@ -74,66 +74,17 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-
 /**
- * Animate
+ * Rubiks Cube
  */
-const clock = new THREE.Clock();
-
-const rubiksCube = new RubiksCube(scene);
-
-// const control = new TransformControls(camera, renderer.domElement)
-// control.addEventListener('dragging-changed', (event) => {
-//   orbit.enabled = !event.value;
-// });
-// control.attach(rubiksCube.group);
-// scene.add(control);
-
-
-// const top = rubiksCube.topFacingCubes()
-// console.log({ top })
-// rubiksCube.rotateRight(top)
-
-const top = rubiksCube.topFacingCubes()
-const bottom = rubiksCube.bottomFacingCubes()
-const left = rubiksCube.leftFacingCubes()
-const right = rubiksCube.rightFacingCubes()
-const front = rubiksCube.frontFacingCubes()
-const back = rubiksCube.backFacingCubes()
-
-
-// rubiksCube.frontFacingCubes().rotate(0.5)
-// rubiksCube.leftFacingCubes().rotate(0.5)
-// rubiksCube.bottomFacingCubes().rotate()
-// rubiksCube.topFacingCubes().rotate(0.5)
-// rubiksCube.bottomFacingCubes().rotate(0.2)
-// rubiksCube.leftFacingCubes().rotate()
-// rubiksCube.rightFacingCubes().rotate()
-// rubiksCube.bottomFacingCubes().rotate()
-
-// rubiksCube.bottomFacingCubes().rotate(-1)
-// rubiksCube.rightFacingCubes().rotate(-1)
-// rubiksCube.rightFacingCubes().rotateUp()
-// rubiksCube.leftFacingCubes().rotateUp()
-// rubiksCube.bottomFacingCubes().rotateRight()
-// rubiksCube.topFacingCubes().rotateRight()
-// rubiksCube.bottomFacingCubes().rotateLeft()
-// rubiksCube.leftFacingCubes().rotateUp()
-// rubiksCube.frontFacingCubes().rotateBackward()
-
-// console.log({ left })
-// const bottom = rubiksCube.bottomFacingCubes()
-// console.log({ bottom })
-// console.log(
-//   bottom.map(v => v.group.uuid),
-//   rubiksCube.bottomFacingCubes().map(v => v.group.uuid)
-// )
-
+const rubiksCube = new RubiksCube(scene)
 const cursor = new THREE.Raycaster()
-const pointer = new THREE.Vector2();
+const pointer = new THREE.Vector2()
 const selected = new Map<string, THREE.Object3D>()
 const updatable = new Set<CubeFace>()
+
 let rotating: CubeFace | null = null
+let clickIndex = 0;
 
 function updatePointer (ev: PointerEvent) {
   pointer.x = ( ev.clientX / window.innerWidth ) * 2 - 1;
@@ -142,11 +93,12 @@ function updatePointer (ev: PointerEvent) {
 
 window.addEventListener('pointermove', (ev) => {
   updatePointer(ev)
+  cursor.setFromCamera(pointer, camera)
 })
 
 window.addEventListener('pointerdown', (ev) => {
   updatePointer(ev)
-  cursor.setFromCamera(pointer, camera);
+  cursor.setFromCamera(pointer, camera)
   const cubes = rubiksCube.getCubesByUUID()
   const cubeObjects = rubiksCube.getCubeObjects()
   const hovering = cursor.intersectObjects(cubeObjects)
@@ -159,31 +111,36 @@ window.addEventListener('pointerdown', (ev) => {
 
     const singleCube = cubes.get(object.parent.uuid)
     const isFacing = singleCube.isFacing()
-    // const sides = Object.keys(isFacing).filter((side: keyof typeof isFacing) => isFacing[side])
+    const sides = Object.keys(isFacing).filter((side: keyof typeof isFacing) => isFacing[side])
+    const side = sides[clickIndex % sides.length]
+    console.log(sides, side)
+    rotating = rubiksCube.getFace(side)
 
-    if (isFacing.bottom) {
-      rotating = rubiksCube.bottomFacingCubes()
-    }
-    else if (isFacing.left) {
-      rotating = rubiksCube.leftFacingCubes()
-    }
-    else if (isFacing.right) {
-      rotating = rubiksCube.rightFacingCubes()
-    }
-    else if (isFacing.top) {
-      rotating = rubiksCube.topFacingCubes()
-    } 
-    else if (isFacing.front) {
-      rotating = rubiksCube.frontFacingCubes()
-    }
-    else if (isFacing.back) {
-      rotating = rubiksCube.backFacingCubes()
-    } 
+    // if (isFacing.bottom) {
+    //   rotating = rubiksCube.bottomFacingCubes()
+    // }
+    // else if (isFacing.left) {
+    //   rotating = rubiksCube.leftFacingCubes()
+    // }
+    // else if (isFacing.right) {
+    //   rotating = rubiksCube.rightFacingCubes()
+    // }
+    // else if (isFacing.top) {
+    //   rotating = rubiksCube.topFacingCubes()
+    // } 
+    // else if (isFacing.front) {
+    //   rotating = rubiksCube.frontFacingCubes()
+    // }
+    // else if (isFacing.back) {
+    //   rotating = rubiksCube.backFacingCubes()
+    // } 
 
     if (rotating) {
       rotating.scale(1.05)
     }
   }
+
+  clickIndex++
 })
 
 const movement = new MovementTracker()
@@ -208,9 +165,13 @@ window.addEventListener('pointerup', () => {
   // rubiksCube.autoRotate = true
   orbit.enabled = true
 })
-const tick = () => {
-  cursor.setFromCamera(pointer, camera);
 
+/**
+ * Animate
+ */
+const clock = new THREE.Clock()
+
+const tick = () => {
   const deltaTime = clock.getDelta();
   const elapsedTime = clock.elapsedTime;
   
@@ -221,13 +182,6 @@ const tick = () => {
     const updated = object.update({ deltaTime })
     if (!updated) updatable.delete(object)
   })
-  
-  // top.rotate(deltaTime * 0.15)
-  // bottom.rotate(deltaTime * -0.25)
-  // left.rotate(deltaTime)
-  // right.rotate(deltaTime)
-  // front.rotate(deltaTime)
-  // back.rotate(deltaTime)
 
   // Render
   renderer.render(scene, camera);
